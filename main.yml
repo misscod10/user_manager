@@ -1,0 +1,31 @@
+---
+
+- name: Create users and add SSH key
+  hosts: servers
+  gather_facts: false
+  become: true
+  vars_prompt:
+    - name: "user_names"
+      prompt: "Enter the names of the users to be created, separated by commas"
+      private: no
+    - name: "ssh_key"
+      prompt: "Enter the SSH public key to be added to the authorized_keys file for the new users"
+      private: no
+  tasks:
+    - name: Create user accounts
+      user:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ user_names.split(',') }}"
+
+    - name: Create home directories
+      file:
+        path: "/home/{{ item }}"
+        state: directory
+      loop: "{{ user_names.split(',') }}"
+
+    - name: Add SSH key to authorized_keys file
+      authorized_key:
+        user: "{{ item }}"
+        key: "{{ ssh_key }}"
+      loop: "{{ ssh_key.split(',') }}"
