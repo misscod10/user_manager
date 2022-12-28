@@ -1,0 +1,15 @@
+---
+- hosts: servers
+  become: true
+  vars_prompt:
+    - name: "users_to_delete"
+      prompt: "Enter a comma-separated list of users to delete"
+      default: ""
+      private: no
+  tasks:
+  - name: Delete user
+    user:
+      name: "{{ item }}"
+      state: absent
+    loop: "{{ users_to_delete.split(',') }}"
+
